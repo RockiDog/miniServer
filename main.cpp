@@ -19,6 +19,7 @@ int Main(int argc, char** argv) {
   /* Launch the FTP Server */
   /*************************/
   g_ftpserver = new FTPServer(DEFAULT_CTRL_PORT);
+  g_ftpserver->init();
   g_ftpserver->run();
   delete g_ftpserver;
 

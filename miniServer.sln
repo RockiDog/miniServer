@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniServer", "miniServer.vcxproj", "{C7A568C0-F3F1-466E-9484-155DAAA89AEF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniFTP", "..\miniFTP\miniFTP.vcxproj", "{310BCB9F-3056-4D0B-8C07-B3252AE478F2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -17,10 +15,6 @@ Global
 		{C7A568C0-F3F1-466E-9484-155DAAA89AEF}.Debug|Win32.Build.0 = Debug|Win32
 		{C7A568C0-F3F1-466E-9484-155DAAA89AEF}.Release|Win32.ActiveCfg = Release|Win32
 		{C7A568C0-F3F1-466E-9484-155DAAA89AEF}.Release|Win32.Build.0 = Release|Win32
-		{310BCB9F-3056-4D0B-8C07-B3252AE478F2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{310BCB9F-3056-4D0B-8C07-B3252AE478F2}.Debug|Win32.Build.0 = Debug|Win32
-		{310BCB9F-3056-4D0B-8C07-B3252AE478F2}.Release|Win32.ActiveCfg = Release|Win32
-		{310BCB9F-3056-4D0B-8C07-B3252AE478F2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

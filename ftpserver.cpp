@@ -42,11 +42,13 @@ bool FTPServer::init() {
 }
 
 void FTPServer::run() {
+  printf("FTP Server running...\n");
   if (ctrl_server_.Accept() == false) {
     printf("I don't know what happened but the server just broken down...\n");
     return;
   }
   printf("One client connected\n");
+
   while (true) {
     /**********************************/
     /* Receive the client request */
@@ -96,11 +98,27 @@ void FTPServer::run() {
         /* PUT to upload files */
         /***********************/
         } else if (command[0] == "PUT") {
+          if (command.size() < 2) {
+            string error_message = "?Too few parameters!";
+            if (ctrl_server_.Send(error_message.c_str(), error_message.size()) == false)
+              break;
+          } else {
+            if (put(command[1]) == false)
+              break;
+          }
 
         /*************************/
         /* GET to download files */
         /*************************/
         } else if (command[0] == "GET") {
+          if (command.size() < 2) {
+            string error_message = "?Too few parameters!";
+            if (ctrl_server_.Send(error_message.c_str(), error_message.size()) == false)
+              break;
+          } else {
+            if (get(command[1]) == false)
+              break;
+          }
 
         /*****************/
         /* Wrong command */
@@ -141,7 +159,6 @@ bool FTPServer::put(const string& server_path) {
   /*******************************/
   /* Generate a random data port */
   /*******************************/
-  char buffer[6];
   const int data_port = rand() % (65536 - 1024) + 1024;
   string data_port_message = to_string(rand() % (65536 - 1024) + 1024);
   if (ctrl_server_.Send(data_port_message.c_str(), data_port_message.size()) == false)
@@ -250,7 +267,6 @@ bool FTPServer::get(const string& server_path) {
   /*******************************/
   /* Generate a random data port */
   /*******************************/
-  char buffer[6];
   const int data_port = rand() % (65536 - 1024) + 1024;
   string data_port_message = to_string(rand() % (65536 - 1024) + 1024);
   if (ctrl_server_.Send(data_port_message.c_str(), data_port_message.size()) == false)
@@ -279,26 +295,15 @@ bool FTPServer::get(const string& server_path) {
   /*********************/
   /* Transfer the file */
   /*********************/
-  if (data_server_.Send(blocks, filesize) == true) {
-    if (ctrl_server_.Send((Byte*)(&filesize), sizeof(filesize) == false)) {
-      for (list< pair<Byte*, int> >::const_iterator it = blocks.cbegin(); it != blocks.cend(); ++it)
-        delete [] it->first;
-      ifs.close();
-      data_server_.Close();
-      return false;
-    }
-    for (list< pair<Byte*, int> >::const_iterator it = blocks.cbegin(); it != blocks.cend(); ++it)
-      delete [] it->first;
-    ifs.close();
-    data_server_.Close();
-    return true;
-  }
-
+  bool result = data_server_.Send(blocks, filesize);
   for (list< pair<Byte*, int> >::const_iterator it = blocks.cbegin(); it != blocks.cend(); ++it)
     delete [] it->first;
   ifs.close();
   data_server_.Close();
-  return false;
+  if (result == true)
+    return ctrl_server_.Send((Byte*)(&filesize), sizeof(filesize));
+  else
+    return false;
 }
 
 bool FTPServer::chdir(const string& dir) {
