@@ -56,15 +56,16 @@ void FTPServer::run() {
     long long length;
     if (ctrl_server_.Recv((Byte*)(&length), sizeof(length)) == true) {
 
-      /*********************/
-      /* Parse the request */
-      /*********************/
       Byte* buffer = new char[length + 1];
       buffer[length] = '\0';
-      vector<string> command = split(buffer, ':');
-      delete [] buffer;
 
       if (ctrl_server_.Recv(buffer, length) == true) {
+
+        /*********************/
+        /* Parse the request */
+        /*********************/
+        printf(">>> %s\n", buffer);
+        vector<string> command = split(buffer, ':');
 
         /***********************************************/
         /* LIST to list the files under the given path */
@@ -130,6 +131,8 @@ void FTPServer::run() {
       } else {
         break;
       }
+
+      delete [] buffer;
     } else {
       break;
     }

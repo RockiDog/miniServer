@@ -151,7 +151,7 @@ bool TCPServer::Recv(Byte* buffer, long long length) {
     buffer_size = MAX_INT;
     while (buffer_size > 0) {
       int result = recv(client_socket_, cursor, buffer_size, 0);
-      if (result > 0) {
+      if (result >= 0) {
         buffer_size -= result;
         printf("%d bytes received...\n", result);
       } else if (result == 0) {
@@ -166,7 +166,7 @@ bool TCPServer::Recv(Byte* buffer, long long length) {
   buffer_size = length % MAX_INT;
   while (buffer_size > 0) {
     int result = recv(client_socket_, cursor, buffer_size, 0);
-    if (result > 0) {
+    if (result >= 0) {
       buffer_size -= result;
       printf("%d bytes received...\n", result);
     } else if (result == 0) {
@@ -186,7 +186,7 @@ bool TCPServer::Recv(const list< pair<Byte*, int> >& blocks, long long length) {
     int buffer_size = it->second;
     while (buffer_size > 0) {
       int result = recv(client_socket_, it->first, buffer_size, 0);
-      if (result > 0) {
+      if (result >= 0) {
         buffer_size -= result;
         printf("%d bytes received...\n", result);
       } else if (result == 0) {
