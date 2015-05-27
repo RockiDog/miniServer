@@ -250,12 +250,14 @@ bool FTPServer::get(const string& server_path) {
   /*********************************************/
   /* Make sure the file exists & Read the file */
   /*********************************************/
-  ifstream ifs(server_path);
+  ifstream ifs(server_path, ifstream::ate | ifstream::binary);
   if (!ifs) {
     printf("Can not create file!\n");
     return false;
   }
   streamsize filesize = ifs.tellg();
+  ifs.seekg(0);
+  printf("File size %d bytes\n", filesize);
   list< pair<Byte*, int> > blocks;
   for (int i = 0; i < filesize / MAX_INT; ++i) {
     Byte* block = new Byte[MAX_INT];
@@ -281,7 +283,6 @@ bool FTPServer::get(const string& server_path) {
     return false;
   } else {
     printf("Listening to the data port %d...\n", data_port);
-    return true;
   }
   string data_port_message = to_string(data_port);
   if (ctrl_server_.Send(data_port_message.c_str(), data_port_message.size()) == false) {
@@ -306,10 +307,7 @@ bool FTPServer::get(const string& server_path) {
     delete [] it->first;
   ifs.close();
   data_server_.Close();
-  if (result == true)
-    return ctrl_server_.Send((Byte*)(&filesize), sizeof(filesize));
-  else
-    return false;
+  return true;
 }
 
 bool FTPServer::chdir(const string& dir) {
