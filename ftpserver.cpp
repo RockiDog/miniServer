@@ -44,7 +44,7 @@ bool FTPServer::init() {
 void FTPServer::run() {
   printf("FTP Server running...\n");
   if (ctrl_server_.Accept() == false) {
-    printf("I don't know what happened but the server just broken down...\n");
+    printf("Fail to accept...\n");
     return;
   }
   printf("One client connected\n");
@@ -76,7 +76,8 @@ void FTPServer::run() {
             if (ctrl_server_.Send(error_message.c_str(), error_message.size()) == false)
               break;
           } else {
-            string file_list = lsfile(command[1]);
+            string dir = command[1] + "\\*";
+            string file_list = lsfile(dir);
             if (ctrl_server_.Send(file_list.c_str(), file_list.size()) == false)
               break;
           }
@@ -317,7 +318,7 @@ bool FTPServer::chdir(const string& dir) {
     d = &dir;
 
   if (SetCurrentDirectory(d->c_str()) == false) {
-    printf("GetCurrentDirectory failed(%d)\n", GetLastError());
+    printf("SetCurrentDirectory failed(%d)\n", GetLastError());
     return false;
   }
   current_path_ = *d;
@@ -330,11 +331,11 @@ string FTPServer::lsfile(const string& dir) {
   if (h_find == INVALID_HANDLE_VALUE) {
     return "?Wrong directory!";
   } else {
-    string file_list = dir + "\n";
+    string file_list = "\n";
     do {
       if (w32_find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         char* info = new char[MAX_FILE_INFO_LENGHT];
-        sprintf_s(info, MAX_FILE_INFO_LENGHT, " <DIR>  %12.10s\n", w32_find_data.cFileName);
+        sprintf_s(info, MAX_FILE_INFO_LENGHT, " <DIR>  %-22.20s\n", w32_find_data.cFileName);
         file_list += info;
         delete [] info;
       } else {
@@ -342,7 +343,7 @@ string FTPServer::lsfile(const string& dir) {
         LARGE_INTEGER filesize;
         filesize.LowPart = w32_find_data.nFileSizeLow;
         filesize.HighPart = w32_find_data.nFileSizeHigh;
-        sprintf_s(info, MAX_FILE_INFO_LENGHT, " <FILE> %12.10s %12.10ld bytes\n", w32_find_data.cFileName, filesize.QuadPart);
+        sprintf_s(info, MAX_FILE_INFO_LENGHT, " <FILE> %-22.20s %12ld bytes\n", w32_find_data.cFileName, filesize.QuadPart);
         file_list += info;
         delete [] info;
       }
@@ -355,7 +356,7 @@ vector<string> FTPServer::split(const string& str, char separator) {
   string s = str;
   if (s.back() == separator)
     s.pop_back();
-  char* sub_string = new char[str.length()];
+  char* sub_string = new char[str.length() + 1];
   int sub_len = 0;
   vector<string> strings;
 

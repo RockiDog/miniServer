@@ -9,7 +9,7 @@
 namespace miniserver {
 
 const int DEFAULT_CTRL_PORT = 21;
-const int MAX_FILE_INFO_LENGHT = 40;
+const int MAX_FILE_INFO_LENGHT = 80;
 
 class FTPServer {
  public:

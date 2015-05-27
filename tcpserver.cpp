@@ -3,6 +3,7 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
+#include <cstdio>
 #include <list>
 #include <utility>
 
@@ -19,22 +20,33 @@ bool TCPServer::Listen(const int port) {
   /*****************************/
   /* Initialize Windows socket */
   /*****************************/
-  if (WSAStartup(MAKEWORD(2, 2), &wsa_data_) != 0)
+  if (WSAStartup(MAKEWORD(2, 2), &wsa_data_) != 0) {
+    printf("\t--tcpserver:\n");
+    printf("\t--Listen():\n");
+    printf("\t--Failed to initialize\n");
     return false;
+  }
 
   /***************************************/
   /* Resolve the server address and port */
   /***************************************/
   client_addr_.sin_family = AF_INET;
   client_addr_.sin_port = htons(port_);
-  if (inet_pton(AF_INET, client_name_.c_str(), &client_addr_.sin_addr.s_addr) != 0)
+  if (inet_pton(AF_INET, client_name_.c_str(), &client_addr_.sin_addr.s_addr) != 0) {
+    printf("\t--tcpserver:\n");
+    printf("\t--Listen():\n");
+    printf("\t--Failed to resolve address or port\n");
     return false;
+  }
 
   /*******************/
   /* Create a socket */
   /*******************/
   listen_socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (listen_socket_ == INVALID_SOCKET) {
+    printf("\t--tcpserver:\n");
+    printf("\t--Listen():\n");
+    printf("\t--Failed to create socket\n");
     WSACleanup();
     return false;
   }
@@ -43,6 +55,10 @@ bool TCPServer::Listen(const int port) {
   /* Attempt to bind */
   /*******************/
   if (bind(listen_socket_, (const SOCKADDR*)(&client_addr_), sizeof(client_addr_)) == SOCKET_ERROR) {
+    printf("\t--tcpserver:\n");
+    printf("\t--Listen():\n");
+    printf("\t--Failed to bind socket\n");
+    printf("\tbind failed(%d)\n", WSAGetLastError());
     WSACleanup();
     return false;
   }
@@ -52,6 +68,9 @@ bool TCPServer::Listen(const int port) {
   /************************/
   if (listen(listen_socket_, SOMAXCONN) == SOCKET_ERROR) {
     closesocket(listen_socket_);
+    printf("\t--tcpserver:\n");
+    printf("\t--Listen():\n");
+    printf("\t--Failed to listen socket\n");
     WSACleanup();
     return false;
   }
@@ -66,6 +85,7 @@ bool TCPServer::Accept() {
   /**************************/
   client_socket_ = accept(listen_socket_, 0, 0);
   if (client_socket_ == INVALID_SOCKET) {
+    printf("Invalid socket!\n");
     Close();
     return false;
   }
