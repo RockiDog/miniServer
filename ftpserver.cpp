@@ -154,7 +154,7 @@ bool FTPServer::put(const string& server_path) {
     ctrl_server_.Send(error_message.c_str(), error_message.size());
     return false;
   }
-  ofstream ofs(server_path);
+  ofstream ofs(server_path, ofstream::binary);
   if (!ofs) {
     printf("Can not create file!\n");
     return false;
@@ -164,19 +164,20 @@ bool FTPServer::put(const string& server_path) {
   /* Generate a random data port */
   /*******************************/
   const int data_port = rand() % (65536 - 1024) + 1024;
-  string data_port_message = to_string(rand() % (65536 - 1024) + 1024);
-  if (ctrl_server_.Send(data_port_message.c_str(), data_port_message.size()) == false)
-    return false;
 
-  /***************************/
-  /* Listen on the data port */
-  /***************************/
+  /*****************************************************/
+  /* Send back the data port & Listen on the data port */
+  /*****************************************************/
   if (data_server_.Listen(data_port) == false) {
     printf("Failed to listen to the data port!\n");
     return false;
   } else {
-    printf("Listening to the data port %d...\n", ctrl_port_);
-    return true;
+    printf("Listening to the data port %d...\n", data_port);
+  }
+  string data_port_message = to_string(data_port);
+  if (ctrl_server_.Send(data_port_message.c_str(), data_port_message.size()) == false) {
+    printf("Failed to send back the data port message!\n");
+    return false;
   }
 
   /**************************************************/
@@ -211,15 +212,6 @@ bool FTPServer::put(const string& server_path) {
     /* Receive the file */
     /********************/
     if (data_server_.Recv(blocks, filesize) == true) {
-
-      /* Send back the acknowledge information */
-      if (ctrl_server_.Send((Byte*)(&filesize), sizeof(filesize)) == false) {
-        for (list< pair<Byte*, int> >::const_iterator it = blocks.cbegin(); it != blocks.cend(); ++it)
-          delete[] it->first;
-        ofs.close();
-        data_server_.Close();
-        return false;
-      }
 
       /**************************/
       /* Write back to the disk */
@@ -276,7 +268,7 @@ bool FTPServer::get(const string& server_path) {
   const int data_port = rand() % (65536 - 1024) + 1024;
 
   /*****************************************************/
-  /* Send back the data port & listen on the data port */
+  /* Send back the data port & Listen on the data port */
   /*****************************************************/
   if (data_server_.Listen(data_port) == false) {
     printf("Failed to listen to the data port!\n");
