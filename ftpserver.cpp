@@ -272,19 +272,21 @@ bool FTPServer::get(const string& server_path) {
   /* Generate a random data port */
   /*******************************/
   const int data_port = rand() % (65536 - 1024) + 1024;
-  string data_port_message = to_string(rand() % (65536 - 1024) + 1024);
-  if (ctrl_server_.Send(data_port_message.c_str(), data_port_message.size()) == false)
-    return false;
 
-  /***************************/
-  /* Listen on the data port */
-  /***************************/
+  /*****************************************************/
+  /* Send back the data port & listen on the data port */
+  /*****************************************************/
   if (data_server_.Listen(data_port) == false) {
     printf("Failed to listen to the data port!\n");
     return false;
   } else {
-    printf("Listening to the data port %d...\n", ctrl_port_);
+    printf("Listening to the data port %d...\n", data_port);
     return true;
+  }
+  string data_port_message = to_string(data_port);
+  if (ctrl_server_.Send(data_port_message.c_str(), data_port_message.size()) == false) {
+    printf("Failed to send back the data port message!\n");
+    return false;
   }
 
   /**************************************************/
@@ -388,10 +390,10 @@ string FTPServer::to_string(int v) {
   char* tmp = new char[bit_width + 1];
   memset(tmp, 0, bit_width + 1);
   for (int i = bit_width - 1; i >= 0; --i) {
-    tmp[i] = v % 10;
+    tmp[i] = v % 10 + '0';
     v /= 10;
   }
   string str(tmp);
-  delete tmp;
+  delete [] tmp;
   return str;
 }
